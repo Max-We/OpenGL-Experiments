@@ -13,6 +13,7 @@ class LoadingOBJ(OrbitCameraWindow):
     title = "Crazy Teapot"
     gl_version = (3, 3)
     resource_dir = Path(__file__).parent.resolve() / 'resources'
+    fullscreen = True
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

@@ -14,6 +14,7 @@ class Playground(CameraWindow):
     https://github.com/moderngl/moderngl-window/blob/master/examples/geometry_cube.py
     """
     title = "Playground"
+    fullscreen = True
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
