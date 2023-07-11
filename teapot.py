@@ -1,4 +1,3 @@
-import struct
 from pathlib import Path
 
 import numpy as np
@@ -7,7 +6,7 @@ from pyrr import Matrix44
 import moderngl
 import os
 
-from interaction import CameraWindow, OrbitCameraWindow
+from camera import OrbitCameraWindow
 
 
 class LoadingOBJ(OrbitCameraWindow):
@@ -18,17 +17,20 @@ class LoadingOBJ(OrbitCameraWindow):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        # Obj: https://www.cgtrader.com/free-3d-models/household/kitchenware/white-porcelain-teapot-57e2cfe2-6112-4c26-a1c7-c18610204b6b
         self.obj = self.load_scene('teapot.obj')
-        # <a href="https://www.freepik.com/free-photo/close-up-white-marble-texture-background_3472378.htm#query=ceramic%20texture&position=7&from_view=search&track=ais">Image by rawpixel.com</a> on Freepik
+        # Texture: https://www.freepik.com/free-photo/close-up-white-marble-texture-background_3472378.htm
         self.texture = self.load_texture_2d('cheramic.jpg')
         self.prog = self.load_program(os.path.join(os.path.dirname(__file__), "teapot.glsl"))
 
-        s_factor = 25
-        scaling_factor = np.array([s_factor, s_factor, s_factor], dtype=np.float32)
-        self.prog['u_Scale'].write(scaling_factor)
+        scaling_factor = 25
+        v_scaling_factor = np.full(3, scaling_factor, dtype=np.float32)
+        self.prog['u_Scale'].write(v_scaling_factor)
 
-        # Create a vao from the first root node (attribs are auto mapped)
+        # https://github.com/moderngl/moderngl/blob/master/examples/loading_obj_files.py
         self.vao = self.obj.root_nodes[0].mesh.vao.instance(self.prog)
+
+        # Config
         self.ctx.enable(moderngl.DEPTH_TEST)
 
         # No mouse controls for this view
@@ -37,9 +39,10 @@ class LoadingOBJ(OrbitCameraWindow):
     def render(self, time, frame_time):
         # Rotate in all directions to see all reflections
         rotation = Matrix44.from_eulers((time, time, time), dtype='f4')
-        translation_cube = Matrix44.from_translation((0.0, 0.0, -3.5), dtype='f4')
-        model_view = translation_cube * rotation
-        self.prog['u_Model'].write(model_view)
+        translation = Matrix44.from_translation((0.0, 0.0, -3.5), dtype='f4')
+        model = translation * rotation
+
+        self.prog['u_Model'].write(model)
         self.prog['u_Camera'].write(self.camera.matrix)
         self.prog['u_Projection'].write(self.camera.projection.matrix)
 

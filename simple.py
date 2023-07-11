@@ -1,7 +1,3 @@
-# Mindestvoraussetzungen
-# - Anzeigen einer simplen 3D-Szene mit mindestens drei Objekten
-# - Rotation und Zoom der Szene mit Tastatur
-# - Objekte haben unterschiedliche Farben
 import os.path
 
 import moderngl
@@ -10,14 +6,14 @@ import numpy as np
 from moderngl_window.opengl.vao import VAO
 from pyrr import Matrix44
 
-from interaction import OrbitCameraWindow, CameraWindow
+from camera import CameraWindow
 
 
 class InteractiveScene(CameraWindow):
     """
     https://github.com/moderngl/moderngl-window/blob/master/examples/geometry_cube.py
     """
-    title = "Interactive Scene"
+    title = "Simple"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -44,6 +40,7 @@ class InteractiveScene(CameraWindow):
         self.vao.buffer(self.shape_vertices, "3f", ["in_position"])
         index_buffer = self.ctx.buffer(self.shape_indices)
         self.vao.index_buffer(index_buffer)
+        self.camera.mouse_sensitivity = 0.1
 
     def render(self, time: float, frametime: float):
         self.ctx.enable(moderngl.DEPTH_TEST)
