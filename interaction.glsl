@@ -13,6 +13,8 @@ out vec3 pos;
 out vec3 normal;
 
 void main() {
+    // Based on
+    // https://github.com/moderngl/moderngl-window/blob/200f2b9ea8b350b0ac9bb6a2d24310c0d8227794/examples/resources/programs/cube_simple.glsl#L4
     mat4 m_view = m_camera * m_model;
     vec4 p = m_view * vec4(in_position, 1.0);
     gl_Position =  m_proj * p;
