@@ -10,20 +10,20 @@ out vec2 TexCoord;
 out vec3 FragPos;
 out vec3 Normal;
 
-uniform mat4 model;
-uniform mat4 camera;
-uniform mat4 projection;
-uniform float rotationAngle;
-uniform vec3 scale;
+uniform mat4 u_Model;
+uniform mat4 u_Camera;
+uniform mat4 u_Projection;
+uniform float u_RotationAngle;
+uniform vec3 u_Scale;
 
 void main() {
     // Based on
     // https://github.com/moderngl/moderngl-window/blob/master/examples/resources/programs/cube_simple.glsl
-    mat4 view = camera * model;
-    vec4 position = view * vec4(in_position * scale, 1.0);
+    mat4 view = u_Camera * u_Model;
+    vec4 position = view * vec4(in_position * u_Scale, 1.0);
     mat3 m_normal = inverse(transpose(mat3(view)));
 
-    gl_Position =  projection * position;
+    gl_Position =  u_Projection * position;
     FragPos = position.xyz;
     Normal = m_normal * normalize(in_normal);
     // Texture loading based on
@@ -39,20 +39,20 @@ in vec2 TexCoord;
 in vec3 FragPos;
 in vec3 Normal;
 
-uniform sampler2D Texture;
-uniform vec3 LightPos;
-uniform vec3 ViewPos;
+uniform sampler2D u_Texture;
+uniform vec3 u_LightPos;
+uniform vec3 u_ViewPos;
 
 void main() {
     // Phong lighting
     // https://www.perplexity.ai/search/4f2086e3-8f75-46e4-b993-d01dc38936c0?s=c
-    vec3 color = texture(Texture, TexCoord).rgb;
+    vec3 color = texture(u_Texture, TexCoord).rgb;
 
     vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(LightPos - FragPos);
+    vec3 lightDir = normalize(u_LightPos - FragPos);
     float diff = max(dot(norm, lightDir), 0.0);
 
-    vec3 viewDir = normalize(ViewPos - FragPos);
+    vec3 viewDir = normalize(u_ViewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 128.0);
 

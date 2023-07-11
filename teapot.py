@@ -25,7 +25,7 @@ class LoadingOBJ(OrbitCameraWindow):
 
         s_factor = 25
         scaling_factor = np.array([s_factor, s_factor, s_factor], dtype=np.float32)
-        self.prog['scale'].write(scaling_factor)
+        self.prog['u_Scale'].write(scaling_factor)
 
         # Create a vao from the first root node (attribs are auto mapped)
         self.vao = self.obj.root_nodes[0].mesh.vao.instance(self.prog)
@@ -39,9 +39,9 @@ class LoadingOBJ(OrbitCameraWindow):
         rotation = Matrix44.from_eulers((time, time, time), dtype='f4')
         translation_cube = Matrix44.from_translation((0.0, 0.0, -3.5), dtype='f4')
         model_view = translation_cube * rotation
-        self.prog['model'].write(model_view)
-        self.prog['camera'].write(self.camera.matrix)
-        self.prog['projection'].write(self.camera.projection.matrix)
+        self.prog['u_Model'].write(model_view)
+        self.prog['u_Camera'].write(self.camera.matrix)
+        self.prog['u_Projection'].write(self.camera.projection.matrix)
 
         self.texture.use()
         self.vao.render()
