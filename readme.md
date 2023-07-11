@@ -14,7 +14,7 @@ an orbit camera.
 
 ## Teapot
 
-![teapot showcase video](teapot/playground.gif)
+![teapot showcase video](doc/teapot.gif)
 
 The teapot script renders a teapot model with porcelain texture and phong lighting model.
 You can press `space` to pause the animation and `f` to toggle the phong lighting fragment shader.
