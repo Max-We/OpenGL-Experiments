@@ -1,4 +1,4 @@
-# OpenGL Experiments
+# 🔬 OpenGL Experiments 🔬
 
 This project contains a few examples of working with ModernGL.
 
