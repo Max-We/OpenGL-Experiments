@@ -1,3 +1,4 @@
+import struct
 from pathlib import Path
 
 import numpy as np
@@ -10,7 +11,7 @@ from interaction import CameraWindow, OrbitCameraWindow
 
 
 class LoadingOBJ(OrbitCameraWindow):
-    title = "Loading OBJ"
+    title = "Crazy Teapot"
     gl_version = (3, 3)
     resource_dir = Path(__file__).parent.resolve() / 'resources'
 
@@ -22,14 +23,9 @@ class LoadingOBJ(OrbitCameraWindow):
         self.texture = self.load_texture_2d('cheramic.jpg')
         self.prog = self.load_program(os.path.join(os.path.dirname(__file__), "teapot.glsl"))
 
-        self.light = self.prog['Light']
-        self.color = self.prog['Color']
-        self.light.value = (-140.0, 400.0, -350.0)
-        self.color.value = (1.0, 1.0, 1.0, 0.1)
-
-        s_factor = 20
+        s_factor = 25
         scaling_factor = np.array([s_factor, s_factor, s_factor], dtype=np.float32)
-        self.prog['Scale'].write(scaling_factor)
+        self.prog['scale'].write(scaling_factor)
 
         # Create a vao from the first root node (attribs are auto mapped)
         self.vao = self.obj.root_nodes[0].mesh.vao.instance(self.prog)
@@ -39,15 +35,13 @@ class LoadingOBJ(OrbitCameraWindow):
         self.camera_enabled = False
 
     def render(self, time, frame_time):
-        self.ctx.clear(1.0, 1.0, 1.0)
-        self.camera.rot_state(2,0)
-
-        self.prog['m_proj'].write(self.camera.projection.matrix)
-        self.prog['m_camera'].write(self.camera.matrix)
-        self.prog['CameraPosition'].write(self.camera.position)
-
-        translation = Matrix44.from_translation((0.0, 0.0, -3.5), dtype='f4')
-        self.prog['m_model'].write(translation)
+        # Rotate in all directions to see all reflections
+        rotation = Matrix44.from_eulers((time, time, time), dtype='f4')
+        translation_cube = Matrix44.from_translation((0.0, 0.0, -3.5), dtype='f4')
+        model_view = translation_cube * rotation
+        self.prog['model'].write(model_view)
+        self.prog['camera'].write(self.camera.matrix)
+        self.prog['projection'].write(self.camera.projection.matrix)
 
         self.texture.use()
         self.vao.render()

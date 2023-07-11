@@ -2,91 +2,59 @@
 
 #if defined VERTEX_SHADER
 
-uniform mat4 m_model;
-uniform mat4 m_camera;
-uniform mat4 m_proj;
-uniform vec3 Scale;
+layout (location = 0) in vec2 in_texcoord_0;
+layout (location = 1) in vec3 in_normal;
+layout (location = 2) in vec3 in_position;
 
-in vec3 in_position;
-in vec3 in_normal;
-in vec2 in_texcoord_0;
+out vec2 TexCoord;
+out vec3 FragPos;
+out vec3 Normal;
 
-out vec3 v_vert;
-out vec3 v_norm;
-out vec2 v_text;
+uniform mat4 model;
+uniform mat4 camera;
+uniform mat4 projection;
+uniform float rotationAngle;
+uniform vec3 scale;
 
 void main() {
-    mat4 m_view = m_camera * m_model;
-    vec4 p = m_view * vec4(in_position * Scale, 1.0);
-    gl_Position = m_proj * p;
+    mat4 view = camera * model;
+    vec4 p = view * vec4(in_position * scale, 1.0);
+    gl_Position =  projection * p;
+    mat3 m_normal = inverse(transpose(mat3(view)));
 
-    v_vert = in_position * Scale;
-    v_norm = in_normal;
-    v_text = in_texcoord_0;
+    FragPos = p.xyz;
+    Normal = m_normal * normalize(in_normal);
+    TexCoord = in_texcoord_0;
 }
 
 #elif defined FRAGMENT_SHADER
 
+out vec4 FragColor;
 
-uniform sampler2D Texture;
-uniform vec4 Color;
-uniform vec3 Light;
-uniform vec3 CameraPosition; // Add a uniform for the camera position
+in vec2 TexCoord;
+in vec3 FragPos;
+in vec3 Normal;
 
-in vec3 v_vert;
-in vec3 v_norm;
-in vec2 v_text;
-
-out vec4 f_color;
+uniform sampler2D texture1;
+uniform vec3 lightPos;
+uniform vec3 viewPos;
 
 void main() {
-    float lum = dot(normalize(v_norm), normalize(v_vert - Light));
-    lum = acos(lum) / 3.14159265;
-    lum = clamp(lum, 0.0, 1.0);
-    lum = lum * lum;
-    lum = smoothstep(0.0, 1.0, lum);
-    lum *= smoothstep(0.0, 80.0, v_vert.z) * 0.3 + 0.7;
-    lum = lum * 0.8 + 0.2;
+    vec3 color = texture(texture1, TexCoord).rgb;
 
-    vec3 color = texture(Texture, v_text).rgb;
-    color = color * (1.0 - Color.a) + Color.rgb * Color.a;
+    vec3 norm = normalize(Normal);
+    vec3 lightDir = normalize(lightPos - FragPos);
+    float diff = max(dot(norm, lightDir), 0.0);
 
-    // Phong shading model
-    vec3 ambient = 0.2 * color;
-    vec3 diffuse = lum * color;
+    vec3 viewDir = normalize(viewPos - FragPos);
+    vec3 reflectDir = reflect(-lightDir, norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
 
-    // Specular component
-    vec3 viewDirection = normalize(CameraPosition - v_vert);
-    vec3 reflectDirection = reflect(normalize(v_vert - Light), normalize(v_norm));
-    float spec = max(dot(viewDirection, reflectDirection), 0.0);
-    float shininess = 32.0; // Adjust this value to control the glossiness
-    vec3 specular = pow(spec, shininess) * vec3(1.0, 1.0, 1.0);
+    vec3 ambient = 0.1 * color;
+    vec3 diffuse = 0.8 * diff * color;
+    vec3 specular = 0.2 * spec * vec3(1.0, 1.0, 1.0);
 
-    f_color = vec4(ambient + diffuse + specular, 1.0);
+    FragColor = vec4(ambient + diffuse + specular, 1.0);
 }
-
-//uniform sampler2D Texture;
-//uniform vec4 Color;
-//uniform vec3 Light;
-//
-//in vec3 v_vert;
-//in vec3 v_norm;
-//in vec2 v_text;
-//
-//out vec4 f_color;
-//
-//void main() {
-//    float lum = dot(normalize(v_norm), normalize(v_vert - Light));
-//    lum = acos(lum) / 3.14159265;
-//    lum = clamp(lum, 0.0, 1.0);
-//    lum = lum * lum;
-//    lum = smoothstep(0.0, 1.0, lum);
-//    lum *= smoothstep(0.0, 80.0, v_vert.z) * 0.3 + 0.7;
-//    lum = lum * 0.8 + 0.2;
-//
-//    vec3 color = texture(Texture, v_text).rgb;
-//    color = color * (1.0 - Color.a) + Color.rgb * Color.a;
-//    f_color = vec4(color * lum, 1.0);
-//}
 
 #endif
